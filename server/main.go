@@ -1,20 +1,20 @@
 package main
 
 import (
-	"net/http"
+	"go.uber.org/fx"
 
-	"github.com/gin-gonic/gin"
+	"control-panel/server/handlers"
+	"control-panel/server/lib"
+	"control-panel/server/lib/extension"
+	"control-panel/server/lib/inf"
 )
 
 func main() {
-	r := gin.Default()
-	r.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
-	err := r.Run()
-	if err != nil {
-		return
-	} // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	fx.New(
+		fx.Provide(
+			extension.AsHandler(handlers.NewHandlerPing),
+		),
+		fx.Provide(lib.NewDefaultGinWithFx),
+		fx.Invoke(func(server inf.IServer) {}),
+	).Run()
 }
